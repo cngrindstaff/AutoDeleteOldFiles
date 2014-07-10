@@ -1,0 +1,7 @@
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\bin\Debug\AutoRemoveOldFiles.exe.config
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\bin\Debug\AutoRemoveOldFiles.exe
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\bin\Debug\AutoRemoveOldFiles.pdb
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\bin\Debug\log4net.dll
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\bin\Debug\log4net.xml
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\obj\Debug\AutoRemoveOldFiles.exe
+C:\Users\cgrindstaf\Documents\Visual Studio 2013\Projects\ConsoleAppAutoDeleteOldFiles\ConsoleApplication1\obj\Debug\AutoRemoveOldFiles.pdb
