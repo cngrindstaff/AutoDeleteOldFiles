@@ -7,6 +7,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 
+//test 1
 namespace AutoFileRemover
 {
     class Program
