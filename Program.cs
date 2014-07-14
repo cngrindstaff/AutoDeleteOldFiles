@@ -11,28 +11,7 @@ namespace AutoFileRemover
 {
     class Program
     {
-        //private static volatile Config _instance;
-        //private static readonly object SyncRoot = new Object();
-        //private static readonly ILog Log = LogManager.GetLogger("AutoFileRemoveLog");
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Program));
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //public static Config Instance
-        //{
-        //    get
-        //    {
-        //        if (_instance == null)
-        //        {
-        //            lock (SyncRoot)
-        //            {
-        //                if (_instance == null)
-        //                    _instance = new Config();
-        //            }
-        //        }
-        //        return _instance;
-        //    }
-        //} //end Instance
-
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,7 +39,6 @@ namespace AutoFileRemover
             //Configure the log4net object.  File will go to C:/Logs/auto_file_remove_log
             try
             {
-                
                 System.DateTime startDate = (DateTime.Now);
                 log.Info("Start: " + startDate);
                 log.Info("AutoFileRemove => OnStart(): AutoFileRemoveStarting");
@@ -72,8 +50,6 @@ namespace AutoFileRemover
             {
                 log.Error("Config => Error loading configuration - " + ex);
             }
-
-
 
 
 
@@ -110,14 +86,13 @@ namespace AutoFileRemover
         static void processDirectories()
         {
 
-            //get head directory from app.config (e.g., C:/...)
-            string mainPath = System.Configuration.ConfigurationManager.AppSettings["path"];
+            string mainDirectory = System.Configuration.ConfigurationManager.AppSettings["path"];
 
             //get files that are in the main directory (aka not in a sub-folder)
-            processFiles(mainPath);
+            processFiles(mainDirectory);
 
-            //get sub-folders from mainPath
-            string[] subdirectoryEntries = Directory.GetDirectories(mainPath);
+            //get sub-folders from mainDirectory
+            string[] subdirectoryEntries = Directory.GetDirectories(mainDirectory);
 
             //send each subdirectory path to processFiles()
             foreach (string subdirectory in subdirectoryEntries)
@@ -138,7 +113,7 @@ namespace AutoFileRemover
             int daysOldNeeded;
 
             //Declare string for name of file's parent folder
-            string folderName;
+            string parentFolderName;
 
             //Get files from folder
             string[] files = Directory.GetFiles(path);
@@ -154,12 +129,12 @@ namespace AutoFileRemover
                 string filePath = fi.DirectoryName;
                 /*GetDirectoryName returns the full path. 
                 GetFileName returns the last path component (last folder) */
-                folderName = Path.GetFileName(Path.GetDirectoryName(fi.FullName));
+                parentFolderName = Path.GetFileName(Path.GetDirectoryName(fi.FullName));
 
                 //Get how old it has to be to delete (value), based on the folder type (key) from app.config
                 try
                 {
-                    daysOldNeeded = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings[folderName]);
+                    daysOldNeeded = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings[parentFolderName]);
 
                     //Checks to make sure the required days is in the app.config file and is > 0
                     if (daysOldNeeded > 0)
@@ -168,26 +143,26 @@ namespace AutoFileRemover
                         if (fi.CreationTime < date.AddDays(-daysOldNeeded))
                         {
                             fi.Delete();
-                            log.Info("The file " + folderName + "\\" + fileName + ", created on " + fi.CreationTime + " has been deleted.");
+                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + " has been deleted.");
                         }
 
                         //Else, keep the file and log. Optional. 
                         else
                         {
-                            log.Info("The file " + folderName + "\\" + fileName + ", created on " + fi.CreationTime + " has not been deleted.");
+                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + " has not been deleted.");
                         }
                     } //end if daysOldNeeded > 0
 
                     else
                     {
-                        log.Warn("The folder " + folderName + " is not established in app.config.");
+                        log.Warn("The folder " + parentFolderName + " is not established in app.config.");
                     }
 
                 }
                 catch
                 {
                     //if there is nothing in the app.config file with that folder name 
-                    log.Warn("The folder " + folderName + " is not set up in app.config.");
+                    log.Warn("The folder " + parentFolderName + " is not set up in app.config.");
                 }
 
 
