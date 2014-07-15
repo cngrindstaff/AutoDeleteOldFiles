@@ -1,19 +1,38 @@
 ﻿using System;
 using log4net;
 using System.Configuration;
-using System.Collections.Generic;
-using System.Linq;
+//using System.Collections.Generic;
+//using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace AutoFileRemover
 {
-    class Program
+    public sealed class Config
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Program));
+        //private static volatile Config _instance;
+        //private static readonly object SyncRoot = new Object();
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Config));
 
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //public static Config Instance
+        //{
+        //    get
+        //    {
+        //        if (_instance == null)
+        //        {
+        //            lock (SyncRoot)
+        //            {
+        //                if (_instance == null)
+        //                    _instance = new Config();
+        //            }
+        //        }
+        //        return _instance;
+        //    }
+        //} //end Instance
+ 
+ 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         static void Main(string[] args)
         {
