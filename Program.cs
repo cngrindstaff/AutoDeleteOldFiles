@@ -105,9 +105,6 @@ namespace AutoFileRemover
         {
             string mainDirectory = System.Configuration.ConfigurationManager.AppSettings["path"];
 
-            //get days old for files that are in the main directory (aka not in a sub-folder)
-            getDaysOld(mainDirectory);
-
             //get sub-folders from mainDirectory
             string[] subdirectoryEntries = Directory.GetDirectories(mainDirectory);
 
@@ -120,25 +117,49 @@ namespace AutoFileRemover
         } //end processDirectories()
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        static void getDaysOld(string path)
+        static void getDaysOld(string subdirectory)
         {
+            //Declare string for name of file's parent folder
+            string parentFolderName = Path.GetFileName(subdirectory);
+
+            //Get int for how old the file needs to be in order to be deleted
+            int daysOldNeeded = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings[parentFolderName]);
+
+            //If the age is defined in app.config
+            if (daysOldNeeded != 0)
+            {
+                processFiles(daysOldNeeded, parentFolderName, subdirectory);
+            }
+            
+            
+            //If the folder is not established in app.config, use the default set up in app.config
+            else 
+            {
+                int defaultDaysOldNeeded = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["default"]);
+                processFiles(defaultDaysOldNeeded, parentFolderName, subdirectory);
+            }
+
+
+
+        } //end getDaysOld()
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        static void processFiles(int daysOldNeeded, string parentFolderName, string subdirectory)
+        {
+
             //declare the current date/time
             System.DateTime date = (DateTime.Now);
-
-            //Declare int for how old the file needs to be in order to be deleted
-            int daysOldNeeded;
-
-            //Declare string for name of file's parent folder
-            string parentFolderName;
-
+            
             //Get files from folder
-            string[] files = Directory.GetFiles(path);
+            string[] files = Directory.GetFiles(subdirectory);
 
             //If there are no files in the folder, delete the folder
             if (files.Length == 0)
             {
-                //delete folder
+                Directory.Delete(subdirectory);
+                log.Info("The folder " + parentFolderName + " was empty and has been deleted.");
             }
 
             else
@@ -152,55 +173,32 @@ namespace AutoFileRemover
 
                     //get its head folder name
                     string filePath = fi.DirectoryName;
-                    /*GetDirectoryName returns the full path. 
-                    GetFileName returns the last path component (last folder) */
-                    parentFolderName = Path.GetFileName(Path.GetDirectoryName(fi.FullName));
 
-                    daysOldNeeded = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings[parentFolderName]);
-
-                    //Get how old it has to be to delete (value), based on the folder type (key) from app.config
-                    if (daysOldNeeded != 0)
+                    //Checks to make sure the required days is in the app.config file and is > 0
+                    if (daysOldNeeded > 0)
                     {
-                        processFiles(daysOldNeeded, fi, fileName, parentFolderName, date);
+                        //If it's older than the necessary days, delete and log
+                        if (fi.CreationTime < date.AddDays(-daysOldNeeded))
+                        {
+                            fi.Delete();
+                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has been deleted.");
+                        }
 
+                        //Else, keep the file and log. Optional. 
+                        else
+                        {
+                            //log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has not been deleted.");
+                        }
+                    } //end if daysOldNeeded > 0
 
-
-                    }
-                    else
-                    {
-                        //If the folder is not established in app.config, use the default set up in app.config
-                        int defaultDaysOldNeeded = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["default"]);
-                        processFiles(defaultDaysOldNeeded, fi, fileName, parentFolderName, date);
-                    }
 
 
                 } //end foreach file in files		
             } //end else
-        } //end processFiles()
+            
+            
 
-        static void processFiles(int daysOldNeeded, FileInfo fi, string fileName, string parentFolderName, DateTime date)
-        {
 
-            //Checks to make sure the required days is in the app.config file and is > 0
-            if (daysOldNeeded > 0)
-            {
-                //If it's older than the necessary days, delete and log
-                if (fi.CreationTime < date.AddDays(-daysOldNeeded))
-                {
-                    fi.Delete();
-                    log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has been deleted.");
-                }
-
-                //Else, keep the file and log. Optional. 
-                else
-                {
-                    log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has not been deleted.");
-                }
-            } //end if daysOldNeeded > 0
-
-            else
-            {
-            }
         }//end processFiles
 
 
