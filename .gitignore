@@ -186,5 +186,4 @@ FakesAssemblies/
 
 
 *.csproj
-packages.config
 Properties/AssemblyInfo.cs
