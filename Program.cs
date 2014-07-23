@@ -11,26 +11,26 @@ namespace AutoFileRemover
 {
     public sealed class Config
     {
-        //private static volatile Config _instance;
-        //private static readonly object SyncRoot = new Object();
+        private static volatile Config _instance;
+        private static readonly object SyncRoot = new Object();
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(Config));
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //public static Config Instance
-        //{
-        //    get
-        //    {
-        //        if (_instance == null)
-        //        {
-        //            lock (SyncRoot)
-        //            {
-        //                if (_instance == null)
-        //                    _instance = new Config();
-        //            }
-        //        }
-        //        return _instance;
-        //    }
-        //} //end Instance
+        public static Config Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (SyncRoot)
+                    {
+                        if (_instance == null)
+                            _instance = new Config();
+                    }
+                }
+                return _instance;
+            }
+        } //end Instance
  
  
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,7 +82,7 @@ namespace AutoFileRemover
                 }
                 else
                 {
-                    log.Info("There are " + appSettings.Count + " appSettings.");
+                    //log.Info("There are " + appSettings.Count + " appSettings.");
                 }
 
             }
@@ -97,10 +97,7 @@ namespace AutoFileRemover
 
 
 
-
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         static void processDirectories()
         {
             string mainDirectory = System.Configuration.ConfigurationManager.AppSettings["path"];
@@ -117,6 +114,7 @@ namespace AutoFileRemover
         } //end processDirectories()
 
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         static void getDaysOld(string subdirectory)
         {
             //Declare string for name of file's parent folder
@@ -131,7 +129,6 @@ namespace AutoFileRemover
                 processFiles(daysOldNeeded, parentFolderName, subdirectory);
             }
             
-            
             //If the folder is not established in app.config, use the default set up in app.config
             else 
             {
@@ -140,12 +137,10 @@ namespace AutoFileRemover
             }
 
 
-
         } //end getDaysOld()
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         static void processFiles(int daysOldNeeded, string parentFolderName, string subdirectory)
         {
 
