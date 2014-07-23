@@ -37,7 +37,6 @@ namespace AutoFileRemover
         static void Main(string[] args)
         {
             log4net.Config.XmlConfigurator.Configure();
-             
             
             LoadConfig();
             processDirectories();
@@ -91,7 +90,7 @@ namespace AutoFileRemover
             {
                 //write error to log file
                 log.Error("Error reading app settings");
-                //Environment.Exit(0);   //Disable during debugging
+                Environment.Exit(0); 
             }
 
         } //end ReadAllSettings()
@@ -104,56 +103,76 @@ namespace AutoFileRemover
 
         static void processDirectories()
         {
-
             string mainDirectory = System.Configuration.ConfigurationManager.AppSettings["path"];
-
-            //get files that are in the main directory (aka not in a sub-folder)
-            processFiles(mainDirectory);
 
             //get sub-folders from mainDirectory
             string[] subdirectoryEntries = Directory.GetDirectories(mainDirectory);
 
-            //send each subdirectory path to processFiles()
+            //send each subdirectory path to getDaysOld()
             foreach (string subdirectory in subdirectoryEntries)
             {
-                processFiles(subdirectory);
+                getDaysOld(subdirectory);
             }
 
         } //end processDirectories()
 
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        static void processFiles(string path)
+        static void getDaysOld(string subdirectory)
         {
+            //Declare string for name of file's parent folder
+            string parentFolderName = Path.GetFileName(subdirectory);
+
+            //Get int for how old the file needs to be in order to be deleted
+            int daysOldNeeded = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings[parentFolderName]);
+
+            //If the age is defined in app.config
+            if (daysOldNeeded != 0)
+            {
+                processFiles(daysOldNeeded, parentFolderName, subdirectory);
+            }
+            
+            
+            //If the folder is not established in app.config, use the default set up in app.config
+            else 
+            {
+                int defaultDaysOldNeeded = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["default"]);
+                processFiles(defaultDaysOldNeeded, parentFolderName, subdirectory);
+            }
+
+
+
+        } //end getDaysOld()
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        static void processFiles(int daysOldNeeded, string parentFolderName, string subdirectory)
+        {
+
             //declare the current date/time
             System.DateTime date = (DateTime.Now);
-
-            //Declare int for how old the file needs to be in order to be deleted
-            int daysOldNeeded;
-
-            //Declare string for name of file's parent folder
-            string parentFolderName;
-
+            
             //Get files from folder
-            string[] files = Directory.GetFiles(path);
+            string[] files = Directory.GetFiles(subdirectory);
 
-            foreach (string file in files)
+            //If there are no files in the folder, delete the folder
+            if (files.Length == 0)
             {
-                FileInfo fi = new FileInfo(file);
+                Directory.Delete(subdirectory);
+                log.Info("The folder " + parentFolderName + " was empty and has been deleted.");
+            }
 
-                //get the file's name
-                string fileName = fi.Name;
-
-                //get its head folder name
-                string filePath = fi.DirectoryName;
-                /*GetDirectoryName returns the full path. 
-                GetFileName returns the last path component (last folder) */
-                parentFolderName = Path.GetFileName(Path.GetDirectoryName(fi.FullName));
-
-                //Get how old it has to be to delete (value), based on the folder type (key) from app.config
-                try
+            else
+            {
+                foreach (string file in files)
                 {
-                    daysOldNeeded = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings[parentFolderName]);
+                    FileInfo fi = new FileInfo(file);
+
+                    //get the file's name
+                    string fileName = fi.Name;
+
+                    //get its head folder name
+                    string filePath = fi.DirectoryName;
 
                     //Checks to make sure the required days is in the app.config file and is > 0
                     if (daysOldNeeded > 0)
@@ -162,33 +181,25 @@ namespace AutoFileRemover
                         if (fi.CreationTime < date.AddDays(-daysOldNeeded))
                         {
                             fi.Delete();
-                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + " has been deleted.");
+                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has been deleted.");
                         }
 
                         //Else, keep the file and log. Optional. 
                         else
                         {
-                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + " has not been deleted.");
+                            //log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has not been deleted.");
                         }
                     } //end if daysOldNeeded > 0
 
-                    else
-                    {
-                        log.Warn("The folder " + parentFolderName + " is not established in app.config.");
-                    }
-
-                }
-                catch
-                {
-                    //if there is nothing in the app.config file with that folder name 
-                    log.Warn("The folder " + parentFolderName + " is not set up in app.config.");
-                }
 
 
-            } //end foreach file in files		
+                } //end foreach file in files		
+            } //end else
+            
+            
 
-        } //end processFiles()
 
+        }//end processFiles
 
 
     } //end public sealed class Config
