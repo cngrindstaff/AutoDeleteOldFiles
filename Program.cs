@@ -150,48 +150,64 @@ namespace AutoFileRemover
             //Get files from folder
             string[] files = Directory.GetFiles(subdirectory);
 
-            //If there are no files in the folder, delete the folder
+
+            foreach (string file in files)
+            {
+                FileInfo fi = new FileInfo(file);
+
+                //get the file's name
+                string fileName = fi.Name;
+
+                //get its head folder name
+                string filePath = fi.DirectoryName;
+
+                //Checks to make sure the required days is in the app.config file and is > 0
+                if (daysOldNeeded > 0)
+                {
+                    //If it's older than the necessary days, delete and log
+                    if (fi.CreationTime < date.AddDays(-daysOldNeeded))
+                    {
+                        fi.Delete();
+                        log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has been deleted.");
+                    }
+
+                    //Else, keep the file and log. Optional. 
+                    else
+                    {
+                        //log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has not been deleted.");
+                    }
+                } //end if daysOldNeeded > 0
+
+
+
+            } //end foreach file in files		
+
+
+            //If there are no files or subfolders in the folder, delete the folder
             if (files.Length == 0)
             {
-                Directory.Delete(subdirectory);
-                log.Info("The folder " + parentFolderName + " was empty and has been deleted.");
+                try
+                {
+                    Directory.Delete(subdirectory);
+                    log.Info("The folder " + parentFolderName + " was empty and has been deleted.");
+                }
+                catch (Exception ex)
+                {
+                    //If a folder is empty, except it has another folder inside it, do nothing
+                    if (ex.Message.Contains("is not empty"))
+                    {
+                        log.Error("The folder " + parentFolderName + " has subfolders and cannot be deleted.");
+                    }
+
+                    else
+                    {
+                        log.Error("The folder " + parentFolderName + " cannot be deleted. " + ex.Message);
+                    }
+                    
+                }
             }
 
-            else
-            {
-                foreach (string file in files)
-                {
-                    FileInfo fi = new FileInfo(file);
 
-                    //get the file's name
-                    string fileName = fi.Name;
-
-                    //get its head folder name
-                    string filePath = fi.DirectoryName;
-
-                    //Checks to make sure the required days is in the app.config file and is > 0
-                    if (daysOldNeeded > 0)
-                    {
-                        //If it's older than the necessary days, delete and log
-                        if (fi.CreationTime < date.AddDays(-daysOldNeeded))
-                        {
-                            fi.Delete();
-                            log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has been deleted.");
-                        }
-
-                        //Else, keep the file and log. Optional. 
-                        else
-                        {
-                            //log.Info("The file " + parentFolderName + "\\" + fileName + ", created on " + fi.CreationTime + ", has not been deleted.");
-                        }
-                    } //end if daysOldNeeded > 0
-
-
-
-                } //end foreach file in files		
-            } //end else
-            
-            
 
 
         }//end processFiles
